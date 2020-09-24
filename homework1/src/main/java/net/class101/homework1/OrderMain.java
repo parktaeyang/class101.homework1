@@ -36,16 +36,21 @@ public class OrderMain {
 		OrderSub orderSub = new OrderSub();
 		Goods[] goodsList = orderSub.listCreate(examGoodsList);
 		
-		String inputVal = "";
+		String inputVal = "O";
 		
 		Scanner sc = new Scanner(System.in);
-		System.out.print("입력(o[order]: 주문, q[quit]: 종료): ");
-		inputVal = sc.nextLine().toUpperCase();
 		
-		ArrayList<GoodsVO> orderGoodsList = orderSub.goodsList(inputVal, goodsList);
-		
-		String returnStr = orderSub.calOrderAmt(orderGoodsList);
-		System.out.println(returnStr);
+		while("O".equals(inputVal)) {
+			System.out.print("입력(o[order]: 주문, q[quit]: 종료): ");
+			inputVal = sc.nextLine().toUpperCase();
+			ArrayList<GoodsVO> orderGoodsList = orderSub.orderGoodsList(inputVal, goodsList);
+			
+			String returnStr = orderSub.calOrderAmt(orderGoodsList);
+			if("O".equals(returnStr)) {
+				goodsList = orderSub.calGoodsStock(orderGoodsList, goodsList);
+			}
+			inputVal = returnStr;
+		}
 		
 		sc.close();
 	}

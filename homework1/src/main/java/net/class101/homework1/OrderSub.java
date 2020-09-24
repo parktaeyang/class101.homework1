@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import net.class101.homework1.exception.SoldOutException;
 import net.class101.homework1.model.Goods;
 import net.class101.homework1.model.GoodsVO;
 
@@ -28,9 +29,11 @@ public class OrderSub implements OrderSubIf{
 		}
 		
 		Goods[] goodsList = null;
-		ArrayList<GoodsVO> returnList = new ArrayList<GoodsVO>();
+		ArrayList<GoodsVO> returnList = null;
 		@Override
-		public ArrayList<GoodsVO> goodsList(String inputVal, Goods[] goodsListVal) {
+		public ArrayList<GoodsVO> orderGoodsList(String inputVal, Goods[] goodsListVal) {
+			returnList = new ArrayList<GoodsVO>();
+			
 			if("O".equals(inputVal.toUpperCase())) {
 				this.goodsList = goodsListVal;
 				System.out.println("상품번호\t상품명\t판매가\t재고");
@@ -38,9 +41,13 @@ public class OrderSub implements OrderSubIf{
 					System.out.println(goodsList[i].getGoodsCode() + " / " +goodsList[i].getClassName() + 
 							" / "+goodsList[i].getSalePrice() + " / "+goodsList[i].getGoodsStock());
 				}
-				orderGoods(inputVal);
+				try {
+					orderGoods(inputVal);
+				} catch (SoldOutException e) {
+					e.printStackTrace();
+				}
 			} else if ("Q".equals(inputVal)) {
-				System.out.println("--주문정보--");
+				System.out.println("고객님의 주문 감사합니다.");
 			} else {
 				System.out.println("올바른 값을 입력해주세요.(o-주문, q-종료)");
 			}
@@ -50,7 +57,7 @@ public class OrderSub implements OrderSubIf{
 		
 		Scanner sc = null;
 		@Override
-		public String orderGoods(String inputVal) {
+		public String orderGoods(String inputVal) throws SoldOutException{
 			Goods goods = null;
 			GoodsVO returnGoods = null;
 			String goodsCode = "";
@@ -95,6 +102,11 @@ public class OrderSub implements OrderSubIf{
 							inputVal = "Q";
 						} else {
 							if (isStringInteager(goodsCount)) {
+								
+								if(0 > (goods.getGoodsStock()-Integer.parseInt(goodsCount))) {
+									throw new SoldOutException("해당상품의 재고가 없습니다.(상품번호 : "+goods.getGoodsCode()+")");
+								}
+								
 								returnGoods = new GoodsVO();
 								returnGoods.setGoodsCode(goods.getGoodsCode());
 								returnGoods.setGoodsKinds(goods.getGoodsKinds());
@@ -132,7 +144,7 @@ public class OrderSub implements OrderSubIf{
 		public String calOrderAmt(ArrayList<GoodsVO> orderListVal) {
 			
 			if(0 == orderListVal.size()) {
-				return "";
+				return "QUIT";
 			}
 			
 			DecimalFormat df = new DecimalFormat("###,###");
@@ -169,7 +181,8 @@ public class OrderSub implements OrderSubIf{
 			}
 			
 			if(errGoodsCode.length() > 0) {
-				returnStr = "주문취소(에러발생)";
+				System.out.println("주문취소(에러발생)");
+				returnStr = "QUIT";
 			} else {
 				System.out.println("주문금액 : " + df.format(orderAmt));
 				if(delyAmt > 0) {
@@ -177,10 +190,23 @@ public class OrderSub implements OrderSubIf{
 				}
 				System.out.println("------------------------------------------");
 				System.out.println("지불금액 : " + df.format(orderAmt+delyAmt));
-				System.out.println("------------------------------------------");
-				returnStr = "주문완료";
+				System.out.println("------------------------------------------\n");
+				returnStr = "O";
 			}
 			
 			return returnStr;
+		}
+
+		public Goods[] calGoodsStock(ArrayList<GoodsVO> orderGoodsListVal, Goods[] goodsListVal) {
+			
+			for(int i=0; i<goodsListVal.length; i++) {
+				for(GoodsVO minusStock : orderGoodsListVal) {
+					if(goodsListVal[i].getGoodsCode().equals(minusStock.getGoodsCode())) {
+						goodsListVal[i].setGoodsStock(goodsListVal[i].getGoodsStock() - minusStock.getGoodsCount());
+					}
+				}
+			}
+			
+			return goodsListVal;
 		}
 	}
