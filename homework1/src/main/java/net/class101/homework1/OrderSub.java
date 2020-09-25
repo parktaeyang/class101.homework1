@@ -38,8 +38,8 @@ public class OrderSub implements OrderSubIf{
 				this.goodsList = goodsListVal;
 				System.out.println("상품번호\t상품명\t판매가\t재고");
 				for(int i=0; i<goodsList.length; i++) {
-					System.out.println(goodsList[i].getGoodsCode() + " / " +goodsList[i].getClassName() + 
-							" / "+goodsList[i].getSalePrice() + " / "+goodsList[i].getGoodsStock());
+					System.out.println(goodsList[i].getGoodsCode() + "\t" +goodsList[i].getClassName() + 
+							"\t"+goodsList[i].getSalePrice() + "\t"+goodsList[i].getGoodsStock());
 				}
 				try {
 					orderGoods(inputVal);
@@ -49,7 +49,7 @@ public class OrderSub implements OrderSubIf{
 			} else if ("Q".equals(inputVal)) {
 				System.out.println("고객님의 주문 감사합니다.");
 			} else {
-				System.out.println("올바른 값을 입력해주세요.(o-주문, q-종료)");
+				System.out.println("올바른 값을 입력해주세요.(o-주문, q-종료)\n");
 			}
 			
 			return returnList;
@@ -202,7 +202,9 @@ public class OrderSub implements OrderSubIf{
 			for(int i=0; i<goodsListVal.length; i++) {
 				for(GoodsVO minusStock : orderGoodsListVal) {
 					if(goodsListVal[i].getGoodsCode().equals(minusStock.getGoodsCode())) {
-						goodsListVal[i].setGoodsStock(goodsListVal[i].getGoodsStock() - minusStock.getGoodsCount());
+						if("KIT".equals(goodsListVal[i].getGoodsKinds())) {
+							goodsListVal[i].setGoodsStock(goodsListVal[i].getGoodsStock() - minusStock.getGoodsCount());
+						}
 					}
 				}
 			}

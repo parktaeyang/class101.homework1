@@ -49,7 +49,11 @@ public class OrderMain {
 			if("O".equals(returnStr)) {
 				goodsList = orderSub.calGoodsStock(orderGoodsList, goodsList);
 			}
-			inputVal = returnStr;
+			if((0 == orderGoodsList.size()) && !(inputVal.equals("Q")) ) {
+				inputVal = "O";
+			} else {
+				inputVal = returnStr;
+			}
 		}
 		
 		sc.close();
